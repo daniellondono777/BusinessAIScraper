@@ -58,11 +58,3 @@ class BusinessScraper:
         
         return url_plus_parsedData
 
-        
-        # for i in parsed_data:
-        #     titles_and_date.append(i)
-            
-
-
-# hola = BusinessScraper('NVDA')
-# print(hola.scrapCompanyProfile())
