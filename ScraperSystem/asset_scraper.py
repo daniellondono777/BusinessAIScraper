@@ -36,7 +36,7 @@ class StockScraper:
         urls = []
         for new in news_table[0].find_all('tr'):
             date_ttl_str = ''
-            for td in new.find_all('td'):
+            for td in new.find_all('td')[1]:
                 date_ttl_str += td.text
                 date_ttl_str += ' ' # Super necessary for future regex filtering
                 try:
@@ -44,7 +44,8 @@ class StockScraper:
                 except:
                     pass
             news.append(date_ttl_str)  
-        print(len(news) == len(urls))
+        [print(i) for i in news[:10]]
+        [print(i) for i in urls[:10]]
         return 0
 
         
