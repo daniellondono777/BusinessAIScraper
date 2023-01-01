@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
 class StockScraper:
     '''
@@ -23,35 +24,59 @@ class StockScraper:
         page = requests.get(url, headers = headers)
         return BeautifulSoup(page.text, 'html.parser')
     
-    def news_urls_scraper(self):
+    def date_formatting(self, arr) -> list:
+        '''
+        Helper function to format all the news
+        '''
+        ret = []
+        actual_date = arr[0].split(' ')[0]
+        for i in range(0, len(arr)):
+            actual = arr[i].split(' ')
+            if len(actual) == 2:
+                if actual[0] != actual_date:
+                    actual_date = actual[0]
+                    ret.append(actual_date + ' ' + actual[1])
+                else:
+                    ret.append(actual_date + ' ' + actual[1])
+            if len(actual) == 1:
+                ret.append(actual_date + ' ' +actual[0])
+        return ret
+    
+    def news_urls_scraper(self) -> pd.DataFrame:
         '''
         Scraps all the URLs of the stock
         '''
         url = 'https://finviz.com/quote.ashx?t={}&p=d'.format(self.ticker)
         soup = self.get_content(url=url, headers = self.headers)
-        news_table = soup.find_all('table', {'class':'fullview-news-outer'}) 
+        news_table = soup.find_all('table', {'class':'fullview-news-outer'})[0]
         # (type(news_table)) <class 'bs4.element.ResultSet'>
         # (len(news_table)) 1
-        news = []
-        urls = []
-        for new in news_table[0].find_all('tr'):
-            date_ttl_str = ''
-            for td in new.find_all('td')[1]:
-                date_ttl_str += td.text
-                date_ttl_str += ' ' # Super necessary for future regex filtering
-                try:
-                    urls.append(str(td.find_all('a', {'class':'tab-link-news'})[0]['href']))
-                except:
-                    pass
-            news.append(date_ttl_str)  
-        [print(i) for i in news[:10]]
-        [print(i) for i in urls[:10]]
-        return 0
+        
+        url = []
+        title = []
+        date = []
+
+        for el in news_table.find_all('a', {'class':'tab-link-news'}):
+            url.append(el['href'])
+            title.append(el.text)
+        for el in news_table.find_all('td', {'align':'right'}):
+            date.append(el.text)
+        date = self.date_formatting(date)
+
+        df = pd.DataFrame()
+        df['title'] = title
+        df['url'] = url
+        df['date'] = date
+
+        return df
+
+
+        
 
         
 
 
 
 i1 = StockScraper('NVDA')
-i1.news_urls_scraper()
+print(i1.news_urls_scraper())
 
