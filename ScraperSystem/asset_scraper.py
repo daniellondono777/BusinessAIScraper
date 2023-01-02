@@ -68,8 +68,9 @@ class StockScraper:
         df['url'] = url
         df['date'] = date
 
-        for i in df['url'].to_numpy():
-            print(i)
+        # for i in df['url'].to_numpy():
+        #     print(i)
+        return df
 
     def text_evaluator(self, url) -> float:
         '''
