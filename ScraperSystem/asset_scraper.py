@@ -26,7 +26,7 @@ class StockScraper:
     
     def date_formatting(self, arr) -> list:
         '''
-        Helper function to format all the news
+        Helper function to format all the dates
         '''
         ret = []
         actual_date = arr[0].split(' ')[0]
@@ -42,9 +42,9 @@ class StockScraper:
                 ret.append(actual_date + ' ' +actual[0])
         return ret
     
-    def news_urls_scraper(self) -> pd.DataFrame:
+    def news_urls_scraper(self): # -> pd.DataFrame:
         '''
-        Scraps all the URLs of the stock
+        Scraps all the URLs of the stock, its title and its date. Returns a Dataframe with this info
         '''
         url = 'https://finviz.com/quote.ashx?t={}&p=d'.format(self.ticker)
         soup = self.get_content(url=url, headers = self.headers)
@@ -68,7 +68,14 @@ class StockScraper:
         df['url'] = url
         df['date'] = date
 
-        return df
+        for i in df['url'].to_numpy():
+            print(i)
+
+    def text_evaluator(self, url) -> float:
+        '''
+        Returns the polarity score of a given article. 
+        '''
+        pass
 
 
         
