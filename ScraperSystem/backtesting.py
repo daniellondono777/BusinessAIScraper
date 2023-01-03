@@ -49,7 +49,10 @@ def polarity_score(article_array):
     scores = []
     for sentence in article_array:
         scores.append(sid_obj.polarity_scores(sentence))
-    return pd.DataFrame(scores).describe()
+    quantiles = pd.DataFrame(scores).describe()['compound'].iloc[4:-1].to_numpy().tolist()
+
+    return quantiles # 25%, 50%, 75% percentile
+
         
 
 arr = text_fetch('https://finance.yahoo.com/m/4dae6613-e054-389c-98b0-9b568c1b98fb/3-top-ai-stocks-ready-for-a.html')

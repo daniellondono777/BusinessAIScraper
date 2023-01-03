@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 class StockScraper:
     '''
@@ -42,6 +43,44 @@ class StockScraper:
                 ret.append(actual_date + ' ' +actual[0])
         return ret
     
+    def text_fetch(self, url) -> list:
+        '''
+        Returns the text in an array of sentences 
+        '''
+        soup = self.get_content(url=url, headers= self.headers)
+        content = []
+        # print(url)
+        if 'finance.yahoo.com' in url:
+            try:
+                ref_url = soup.find_all('a',{'class':'link caas-button'})[0]['href']
+                soup2 = self.get_content(url=ref_url, headers=self.headers)
+                for p in soup2.find_all('p'):
+                    content.append(p.text)
+            except:
+                pass
+            try:
+                for p in soup.find_all('p'):
+                    content.append(p.text)
+            except:
+                pass
+        else:
+            for p in soup.find_all('p'):
+                content.append(p.text) 
+        # print('pasa')
+        # print('***')
+        return content
+    
+    def polarity_score(self, article_array) -> list:
+        '''
+        Returns the polarity score of an article
+        '''
+        sid_obj = SentimentIntensityAnalyzer()
+        scores = []
+        for sentence in article_array:
+            scores.append(sid_obj.polarity_scores(sentence)['compound'])
+        return scores
+
+    
     def news_urls_scraper(self): # -> pd.DataFrame:
         '''
         Scraps all the URLs of the stock, its title and its date. Returns a Dataframe with this info
@@ -67,16 +106,15 @@ class StockScraper:
         df['title'] = title
         df['url'] = url
         df['date'] = date
-
-        # for i in df['url'].to_numpy():
-        #     print(i)
+        
         return df
 
-    def text_evaluator(self, url) -> float:
-        '''
-        Returns the polarity score of a given article. 
-        '''
-        pass
+    def df_maker(self):
+        main_df = self.news_urls_scraper()
+        urls = main_df['url'].tolist()
+        ret = [self.polarity_score(self.text_fetch(url)) for url in urls]
+        # TODO: Create a function that calculates de 25th, 50th and 75th percentile for an array of polarity scores
+        return ret
 
 
         
@@ -86,5 +124,5 @@ class StockScraper:
 
 
 i1 = StockScraper('NVDA')
-print(i1.news_urls_scraper())
+print(i1.df_maker())
 
